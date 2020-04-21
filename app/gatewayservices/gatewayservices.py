@@ -19,6 +19,12 @@ class HttpRegistrationService:
         email = request.form['email']
         password = request.form['password']
         confirmpassword = request.form['confirmpassword']
-       
+        
 
+    @http('POST', '/login')
+    def login(self, request):
+        username = request.form['username']
+        password = request.form['password']
+
+    
     
