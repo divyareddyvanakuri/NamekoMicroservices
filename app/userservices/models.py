@@ -7,5 +7,3 @@ class User(object):
 
     def __repr__(self):
         return '<User %r>' % (self.username)
-    
-
