@@ -3,6 +3,8 @@ import json
 from nameko.rpc  import rpc
 
 
+CONFIG = {'AMQP_URI':'amqp://guecst:guest@localhost/'}
+
 class UserServices:
     name = "userservices"
 
