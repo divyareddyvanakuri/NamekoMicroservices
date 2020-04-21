@@ -27,4 +27,10 @@ class HttpRegistrationService:
         password = request.form['password']
 
     
-    
+    @http('POST', '/create')
+    def post_method(self, request):
+        title = request.form['title']
+        text = request.form['text']
+        archive = request.form['archive']
+        color = request.form['color']
+        
