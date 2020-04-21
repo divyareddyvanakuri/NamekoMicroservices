@@ -3,7 +3,7 @@ from sqlalchemy.orm import mapper,relationship,backref
 from database import metadata, db_session 
 
 class User(object):
-    query = db_session.query_property()c
+    query = db_session.query_property()
 
     def __init__(self, username=None, email=None, password=None):
         self.username = username
@@ -13,7 +13,10 @@ class User(object):
     def __repr__(self):
         return '<User %r>' % (self.username)
         
-    
+    def save(self,user):
+        db_session.add(user)
+        db_session.commit()
+        db_session.remove()
 
 users = Table('users', metadata,
     Column('id', Integer, primary_key=True),
@@ -24,3 +27,4 @@ users = Table('users', metadata,
 
 )
 
+mapper(User, users)
