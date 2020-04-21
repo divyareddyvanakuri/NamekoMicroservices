@@ -2,7 +2,6 @@
 import json 
 from nameko.web.handlers import http
 
-
 config = {'AMQP_URI':'amqp://guest:guest@localhost/'}
 
 class HttpRegistrationService:
@@ -41,6 +40,8 @@ class HttpRegistrationService:
         text = request.form['text']
         archive = request.form['archive']
         color = request.form['color']
-        
+       
     
- 
+    @http('DELETE', '/delete/<int:id>') 
+    def delete_method(self,request,id):
+        pass
