@@ -1,7 +1,7 @@
 # http_service.py
 import json 
 from nameko.rpc  import rpc
-from models import User
+from models import User,authenticate_user
 
 CONFIG = {'AMQP_URI':'amqp://guecst:guest@localhost/'}
 
@@ -16,5 +16,6 @@ class UserServices:
 
     @rpc
     def login(self,username,password):
-       return "successfully logged in"
+        user = authenticate_user(username,password)
+        return user
     
