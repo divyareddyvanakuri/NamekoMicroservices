@@ -19,9 +19,16 @@ class HttpNoteService:
 
     @rpc     
     def edit_note(self,id,title,text,archive,color):
-        
-        return "successfully updated the note"
-        
+        note = Note.query.get(id)
+        if note:
+            note.title = title
+            note.text = text
+            note.archive = archive
+            note.color = color
+            db_session.commit()
+            db_session.remove()
+            return "successfully updated the note"
+        return "note not found"
     
     @rpc
     def delete_note(self,id):
