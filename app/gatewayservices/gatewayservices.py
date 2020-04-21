@@ -1,13 +1,17 @@
 # http_service.py
 import json 
 from nameko.web.handlers import http
+from nameko.standalone.rpc import ClusterRpcProxy
+from nameko.rpc import RpcProxy
 
 config = {'AMQP_URI':'amqp://guest:guest@localhost/'}
 
 class HttpRegistrationService:
     name = "gatewayservices"
     
-   
+    userservices = RpcProxy('userservices')
+    
+    
     @http('GET', '/get')
     def get_method(self, request):
         return "welcome to Services"
@@ -18,13 +22,17 @@ class HttpRegistrationService:
         email = request.form['email']
         password = request.form['password']
         confirmpassword = request.form['confirmpassword']
-        
+        if password == confirmpassword:
+            with ClusterRpcProxy(config) as rabbit:
+                return 201,json.dumps({'success': rabbit.userservices.create_user(username,email,password)})
+        return 404,json.dumps({'error':'password mismatch'})
+    
 
     @http('POST', '/login')
     def login(self, request):
         username = request.form['username']
         password = request.form['password']
-
+        
     
     @http('POST', '/create')
     def post_method(self, request):
@@ -40,7 +48,7 @@ class HttpRegistrationService:
         text = request.form['text']
         archive = request.form['archive']
         color = request.form['color']
-       
+        
     
     @http('DELETE', '/delete/<int:id>') 
     def delete_method(self,request,id):
