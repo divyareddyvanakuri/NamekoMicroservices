@@ -12,5 +12,7 @@ class UserServices:
     def create_user(self,username,email,password):
         return "successfully registered"
 
-    
+    @rpc
+    def login(self,username,password):
+        return "successfully logged in"
     
