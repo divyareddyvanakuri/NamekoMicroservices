@@ -50,7 +50,8 @@ class HttpRegistrationService:
         text = request.form['text']
         archive = request.form['archive']
         color = request.form['color']
-        
+        with ClusterRpcProxy(config) as rabbit:
+            return 200,json.dumps({'sucsess':rabbit.noteservices.edit_note(id,title,text,archive,color)})
     
     @http('DELETE', '/delete/<int:id>') 
     def delete_method(self,request,id):
