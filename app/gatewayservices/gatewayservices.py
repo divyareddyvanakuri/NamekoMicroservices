@@ -32,7 +32,8 @@ class HttpRegistrationService:
     def login(self, request):
         username = request.form['username']
         password = request.form['password']
-        
+        with ClusterRpcProxy(config) as rabbit:
+            return 200,json.dumps({'sucsess':rabbit.userservices.login(username,password)})
     
     @http('POST', '/create')
     def post_method(self, request):
