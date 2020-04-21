@@ -34,3 +34,13 @@ class HttpRegistrationService:
         archive = request.form['archive']
         color = request.form['color']
         
+    
+    @http('PUT', '/edit/<int:id>')      
+    def put_method(self,request,id):
+        title = request.form['title']
+        text = request.form['text']
+        archive = request.form['archive']
+        color = request.form['color']
+        
+    
+ 
