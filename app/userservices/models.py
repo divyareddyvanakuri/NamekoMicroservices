@@ -28,3 +28,11 @@ users = Table('users', metadata,
 )
 
 mapper(User, users)
+
+
+def authenticate_user(username,password):
+    user = User.query.filter_by(username=username,password=password).first()
+    print(user)
+    if user is None:
+        return "Unauthenticated"
+    return "sucessfully logged in"
