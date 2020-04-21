@@ -10,7 +10,7 @@ class HttpRegistrationService:
     name = "gatewayservices"
     
     userservices = RpcProxy('userservices')
-    
+    noteservices = RpcProxy('noteservices')
     
     @http('GET', '/get')
     def get_method(self, request):
@@ -41,7 +41,8 @@ class HttpRegistrationService:
         text = request.form['text']
         archive = request.form['archive']
         color = request.form['color']
-        
+        with ClusterRpcProxy(config) as rabbit:
+            return 201,json.dumps({'sucsess':rabbit.noteservices.create_note(title,text,archive,color)})
     
     @http('PUT', '/edit/<int:id>')      
     def put_method(self,request,id):
