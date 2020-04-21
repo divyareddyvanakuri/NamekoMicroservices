@@ -32,7 +32,11 @@ class HttpNoteService:
     
     @rpc
     def delete_note(self,id):
-        
-        return "successfully deleted the note"
-        
+        note = Note.query.get(id)
+        if note:
+            db_session.delete(note)
+            db_session.commit()
+            db_session.remove
+            return "successfully deleted the note"
+        return "note not found"
         
