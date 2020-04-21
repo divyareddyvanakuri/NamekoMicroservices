@@ -55,4 +55,5 @@ class HttpRegistrationService:
     
     @http('DELETE', '/delete/<int:id>') 
     def delete_method(self,request,id):
-        pass
+        with ClusterRpcProxy(config) as rabbit:
+            return 201,json.dumps({'sucsess':rabbit.noteservices.delete_note(id)})
