@@ -90,3 +90,11 @@ class HttpGatewayServices:
             return Response(rabbit.noteservices.delete_note(id))
     
     
+def authorization(token):
+    print(token)
+    auth_s = URLSafeSerializer("secret key")
+    user = auth_s.loads(token)
+    print(user)
+    userid = user['id']
+    return userid
+    
