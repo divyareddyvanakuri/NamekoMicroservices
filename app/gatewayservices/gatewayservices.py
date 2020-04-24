@@ -5,8 +5,9 @@ from nameko.web.handlers import http
 from nameko.standalone.rpc import ClusterRpcProxy
 from nameko.rpc import RpcProxy
 from itsdangerous import URLSafeSerializer,BadSignature
+from redis_server import Redis
 
-
+obj_redis = Redis()
 config = {'AMQP_URI':'amqp://guest:guest@localhost/'}
 
 
@@ -108,5 +109,7 @@ def authorization(token):
     user = auth_s.loads(token)
     print(user)
     userid = user['id']
-    return userid
+    if obj_redis.get(userid):
+        return userid
+    return None
     

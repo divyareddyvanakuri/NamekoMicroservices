@@ -16,6 +16,7 @@ class UserServices:
             return json.dumps({'error':'user already registered','status':400})
         user.save(user)
         return json.dumps({'success':'user sucessfully registered','status':201})
+    
     @rpc
     def login(self,username,password):
         return authenticate_user(username,password)
