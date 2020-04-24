@@ -51,8 +51,9 @@ class HttpGatewayServices:
     def post_method(self, request):
         try:
             token = request.headers['token']
+            userid = authorization(token)
         except (KeyError,BadSignature) as err:
-            return Response(json.dumps({"error":"header token missing or invalide,please login","status_code":400}))
+            return Response(json.dumps({"error":"something went wrong,please login again","status_code":400}))
         try:
             title = request.form['title']
             text = request.form['text']
@@ -61,14 +62,15 @@ class HttpGatewayServices:
         except (KeyError,AttributeError,TypeError):
             return Response(json.dumps({"error":"Invalide key names","status_code":400}))
         with ClusterRpcProxy(config) as rabbit:
-            return Response(rabbit.noteservices.create_note(title,text,archive,color))
+            return Response(rabbit.noteservices.create_note(userid,title,text,archive,color))
     
     @http('PUT', '/edit/<int:id>')      
     def put_method(self,request,id):
         try:
             token = request.headers['token']
-        except (KeyError) as err:
-            return Response(json.dumps({"error":"header token missing or invalide,please login","status_code":400}))
+            userid = authorization(token)
+        except (KeyError,BadSignature) as err:
+            return Response(json.dumps({"error":"something went wrong,please login again","status_code":400}))
         try:
             title = request.form['title']
             text = request.form['text']
@@ -77,17 +79,18 @@ class HttpGatewayServices:
         except (KeyError,AttributeError,TypeError):
             return Response(json.dumps({"error":"Invalide key names","status_code":400}))
         with ClusterRpcProxy(config) as rabbit:
-            return Response(rabbit.noteservices.edit_note(id,title,text,archive,color))
+            return Response(rabbit.noteservices.edit_note(id,userid,title,text,archive,color))
     
     @http('DELETE', '/delete/<int:id>') 
     def delete_method(self,request,id):
         try:
             token = request.headers['token']
+            userid = authorization(token)
         except (KeyError) as err:
-            return Response(json.dumps({"error":"header token missing or invalide,please login","status_code":400}))
+            return Response(json.dumps({"error":"something went wrong,please login again","status_code":400}))
         
         with ClusterRpcProxy(config) as rabbit:
-            return Response(rabbit.noteservices.delete_note(id))
+            return Response(rabbit.noteservices.delete_note(id,userid))
     
     
 def authorization(token):
