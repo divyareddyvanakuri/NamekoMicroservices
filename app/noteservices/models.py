@@ -33,6 +33,20 @@ class Note(object):
     def __repr__(self):
         return '<Note %r>' % (self.title)
 
+    def save(self,note):
+        db_session.add(note)
+        db_session.commit()
+        db_session.remove()
+    
+    def delete(self,note):
+        db_session.delete(note)
+        db_session.commit()
+        db_session.remove()
+    
+    def update(self):
+        db_session.commit()
+        db_session.remove()
+
 notes = Table('notes', metadata,
     Column('id', Integer, primary_key=True),
     Column('title', String),
