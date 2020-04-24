@@ -1,6 +1,10 @@
+import json
 from sqlalchemy import Table, Column, Integer, String, Boolean,ForeignKey,ForeignKeyConstraint
 from sqlalchemy.orm import mapper,relationship,backref
 from database import metadata, db_session 
+import jwt
+from itsdangerous import URLSafeSerializer
+
 
 class User(object):
     query = db_session.query_property()
@@ -23,16 +27,18 @@ users = Table('users', metadata,
     Column('username', String(50), unique=True),
     Column('email', String(120), unique=True),
     Column('password', String),
-    # relationship('Note', backref='person', lazy=True)
-
 )
 
 mapper(User, users)
 
-
 def authenticate_user(username,password):
-    user = User.query.filter_by(username=username,password=password).first()
-    print(user)
+    user = User.query.filter_by(username=username).first()
     if user is None:
-        return "Unauthenticated"
-    return "sucessfully logged in"
+        return json.dumps({'error':'unauthenticated user','status_code':400})
+    if user.password == password:
+        auth_s = URLSafeSerializer("secret key")
+        token = auth_s.dumps({'id':user.id, "username": username})
+        print(token)
+        return json.dumps({'token':token,'status_code':200})
+    return json.dumps({'error':'unauthorized user','status_code':401})
+

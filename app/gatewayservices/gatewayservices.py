@@ -1,16 +1,21 @@
 # http_service.py
 import json 
+from werkzeug.wrappers import Response
 from nameko.web.handlers import http
 from nameko.standalone.rpc import ClusterRpcProxy
 from nameko.rpc import RpcProxy
+from itsdangerous import URLSafeSerializer,BadSignature
+
 
 config = {'AMQP_URI':'amqp://guest:guest@localhost/'}
 
-class HttpRegistrationService:
+
+class HttpGatewayServices:
     name = "gatewayservices"
     
     userservices = RpcProxy('userservices')
     noteservices = RpcProxy('noteservices')
+    
     
     @http('GET', '/get')
     def get_method(self, request):
@@ -18,42 +23,70 @@ class HttpRegistrationService:
 
     @http('POST', '/register')
     def register(self, request):
-        username = request.form['username']
-        email = request.form['email']
-        password = request.form['password']
-        confirmpassword = request.form['confirmpassword']
+        try:
+            username = request.form['username']
+            email = request.form['email']
+            password = request.form['password']
+            confirmpassword = request.form['confirmpassword']
+        except (KeyError,AttributeError,TypeError):
+            return Response(json.dumps({"error":"Invalide key names","status_code":400}))
         if password == confirmpassword:
             with ClusterRpcProxy(config) as rabbit:
-                return 201,json.dumps({'success': rabbit.userservices.create_user(username,email,password)})
-        return 404,json.dumps({'error':'password mismatch'})
+                return Response(rabbit.userservices.create_user(username,email,password))
+        return Response(json.dumps({"error":"password mismatch","status_code":400}))
     
 
     @http('POST', '/login')
     def login(self, request):
-        username = request.form['username']
-        password = request.form['password']
+        try:
+            username = request.form['username']
+            password = request.form['password']
+        except (KeyError,AttributeError,TypeError):
+            return Response(json.dumps({"error":"Invalide Key names","status_code":400}))
+        print(request.form)
         with ClusterRpcProxy(config) as rabbit:
-            return 200,json.dumps({'sucsess':rabbit.userservices.login(username,password)})
+            return Response(rabbit.userservices.login(username,password))
     
     @http('POST', '/create')
     def post_method(self, request):
-        title = request.form['title']
-        text = request.form['text']
-        archive = request.form['archive']
-        color = request.form['color']
+        try:
+            token = request.headers['token']
+        except (KeyError,BadSignature) as err:
+            return Response(json.dumps({"error":"header token missing or invalide,please login","status_code":400}))
+        try:
+            title = request.form['title']
+            text = request.form['text']
+            archive = request.form['archive']
+            color = request.form['color']
+        except (KeyError,AttributeError,TypeError):
+            return Response(json.dumps({"error":"Invalide key names","status_code":400}))
         with ClusterRpcProxy(config) as rabbit:
-            return 201,json.dumps({'sucsess':rabbit.noteservices.create_note(title,text,archive,color)})
+            return Response(rabbit.noteservices.create_note(title,text,archive,color))
     
     @http('PUT', '/edit/<int:id>')      
     def put_method(self,request,id):
-        title = request.form['title']
-        text = request.form['text']
-        archive = request.form['archive']
-        color = request.form['color']
+        try:
+            token = request.headers['token']
+        except (KeyError) as err:
+            return Response(json.dumps({"error":"header token missing or invalide,please login","status_code":400}))
+        try:
+            title = request.form['title']
+            text = request.form['text']
+            archive = request.form['archive']
+            color = request.form['color']
+        except (KeyError,AttributeError,TypeError):
+            return Response(json.dumps({"error":"Invalide key names","status_code":400}))
         with ClusterRpcProxy(config) as rabbit:
-            return 200,json.dumps({'sucsess':rabbit.noteservices.edit_note(id,title,text,archive,color)})
+            return Response(rabbit.noteservices.edit_note(id,title,text,archive,color))
     
     @http('DELETE', '/delete/<int:id>') 
     def delete_method(self,request,id):
+        try:
+            token = request.headers['token']
+        except (KeyError) as err:
+            return Response(json.dumps({"error":"header token missing or invalide,please login","status_code":400}))
+        
         with ClusterRpcProxy(config) as rabbit:
-            return 201,json.dumps({'sucsess':rabbit.noteservices.delete_note(id)})
+            return Response(rabbit.noteservices.delete_note(id))
+    
+    
