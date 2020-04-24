@@ -20,5 +20,7 @@ class UserServices:
     def login(self,username,password):
         return authenticate_user(username,password)
     
-    
+    @rpc
+    def logout_user(self,userid):
+        return logout(userid)
     
