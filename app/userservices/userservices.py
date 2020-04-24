@@ -1,4 +1,4 @@
-# http_service.py
+# rpc_service.py
 import json 
 from nameko.rpc  import rpc
 from models import User,authenticate_user,logout

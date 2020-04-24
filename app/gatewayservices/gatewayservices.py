@@ -92,6 +92,15 @@ class HttpGatewayServices:
         with ClusterRpcProxy(config) as rabbit:
             return Response(rabbit.noteservices.delete_note(id,userid))
     
+    @http('GET','/logout')
+    def logout(self,request):
+        try:
+            token = request.headers['token']
+            userid = authorization(token)
+        except (KeyError,BadSignature) as err:
+            return Response(json.dumps({"error":"something went wrong,please login again","status_code":400}))
+        with ClusterRpcProxy(config) as rabbit:
+            return Response(rabbit.userservices.logout_user(userid))
     
 def authorization(token):
     print(token)
