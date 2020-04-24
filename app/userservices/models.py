@@ -4,7 +4,9 @@ from sqlalchemy.orm import mapper,relationship,backref
 from database import metadata, db_session 
 import jwt
 from itsdangerous import URLSafeSerializer
+from redis_server import Redis
 
+obj_redis = Redis()
 
 class User(object):
     query = db_session.query_property()
@@ -39,6 +41,17 @@ def authenticate_user(username,password):
         auth_s = URLSafeSerializer("secret key")
         token = auth_s.dumps({'id':user.id, "username": username})
         print(token)
+        obj_redis.sets(user.id,token)
+        print(obj_redis.get(user.id))
+        token1 = obj_redis.get(user.id)
+        print(auth_s.loads(token1))
         return json.dumps({'token':token,'status_code':200})
     return json.dumps({'error':'unauthorized user','status_code':401})
 
+def logout(userid):
+    if userid == None:
+        return json.dumps({'error':'please login','status_code':400})
+    print(obj_redis.get(userid))
+    obj_redis.delete(userid)
+    print(obj_redis.get(userid))
+    return json.dumps({"success":"successfully logged out","status_code":200})
