@@ -87,11 +87,36 @@ class HttpGatewayServices:
         try:
             token = request.headers['token']
             userid = authorization(token)
-        except (KeyError) as err:
+        except (KeyError,BadSignature) as err:
             return Response(json.dumps({"error":"something went wrong,please login again","status_code":400}))
         
         with ClusterRpcProxy(config) as rabbit:
             return Response(rabbit.noteservices.delete_note(id,userid))
+
+    
+    @http('POST','/create_label')
+    def create_labels(self,request):
+        try:
+            token = request.headers['token']
+            userid = authorization(token)
+            labelname = request.form['labelname']
+            print(labelname)
+        except (KeyError,BadSignature) as err:
+            return Response(json.dumps({"error":"something went wrong,please login again","status_code":400}))
+        with ClusterRpcProxy(config) as rabbit:
+            return Response(rabbit.noteservices.create_label(userid,labelname))
+    
+
+    @http('DELETE','/delete_label/<str:labelname>')
+    def delete_labels(self,request,labelname):
+        try:
+            token = request.headers['token']
+            userid = authorization(token)
+        except (KeyError,BadSignature) as err:
+            return Response(json.dumps({"error":"something went wrong,please login again","status_code":400}))
+        with ClusterRpcProxy(config) as rabbit:
+            return Response(rabbit.noteservices.delete_label(userid,labelname))
+
     
     @http('GET','/logout')
     def logout(self,request):
@@ -103,6 +128,7 @@ class HttpGatewayServices:
         with ClusterRpcProxy(config) as rabbit:
             return Response(rabbit.userservices.logout_user(userid))
     
+
 def authorization(token):
     print(token)
     auth_s = URLSafeSerializer("secret key")
